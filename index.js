@@ -13,9 +13,11 @@ function cors() {
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+    "Access-Control-Allow-Headers":
+      "Content-Type, Authorization, request-id, x-request-id"
   };
 }
+
 
 async function auth(request, env) {
   const header = request.headers.get("Authorization");
