@@ -1,9 +1,17 @@
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers":
-    "Content-Type, Authorization, request-id, x-request-id"
-};
+function getCorsHeaders(request) {
+  const requestedHeaders =
+    request.headers.get("Access-Control-Request-Headers");
+
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers":
+      requestedHeaders ||
+      "Content-Type, Authorization",
+    "Access-Control-Max-Age": "86400"
+  };
+}
+
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
