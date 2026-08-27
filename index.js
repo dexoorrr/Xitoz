@@ -1,366 +1,498 @@
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers":
+    "Content-Type, Authorization, request-id, x-request-id"
+};
+
 const json = (data, status = 200) =>
-  new Response(JSON.stringify(data, null, 2), {
+  new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization"
+      ...cors,
+      "Content-Type": "application/json; charset=utf-8"
     }
   });
 
-function cors() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers":
-      "Content-Type, Authorization, request-id, x-request-id"
-  };
+function getKey(request) {
+  const auth = request.headers.get("Authorization");
+
+  if (!auth?.startsWith("Bearer "))
+    return null;
+
+  return auth.slice(7).trim();
 }
 
+function validKey(request, env) {
+  const key = getKey(request);
 
-async function auth(request, env) {
-  const header = request.headers.get("Authorization");
-
-  if (!header?.startsWith("Bearer ")) {
+  if (!key || !env.API_KEYS)
     return false;
-  }
 
-  const key = header.slice(7).trim();
-
-  const configured = env.API_KEYS || "";
-
-  const keys = configured
+  return env.API_KEYS
     .split(",")
-    .map(x => x.trim())
-    .filter(Boolean);
-
-  return keys.includes(key);
+    .map(k => k.trim())
+    .filter(Boolean)
+    .includes(key);
 }
+
+/*
+=========================================================
+CONNECTOR
+=========================================================
+*/
+
+const CLIENT_CODE = `
+
+(async () => {
+
+const API = "https://xitoz.dexceroficial.workers.dev";
+
+const KEY = API_KEY;
+
+document.getElementById("xitos-valley")?.remove();
+
+const style = document.createElement("style");
+
+style.textContent = \`
+#xitos-valley{
+position:fixed;
+right:20px;
+bottom:20px;
+width:320px;
+z-index:2147483647;
+font-family:Arial,sans-serif;
+color:#fff3cf;
+background:linear-gradient(145deg,#513b25,#2d2117);
+border:3px solid #c69a52;
+border-radius:16px;
+box-shadow:0 12px 40px #000b;
+overflow:hidden
+}
+#xv-head{
+padding:14px;
+font-size:18px;
+font-weight:bold;
+background:linear-gradient(#6d9c45,#416b2c)
+}
+#xv-body{padding:14px}
+.xv-input{
+width:100%;
+box-sizing:border-box;
+padding:9px;
+margin:5px 0 10px;
+background:#211913;
+color:#fff0c5;
+border:2px solid #86643a;
+border-radius:8px
+}
+.xv-btn{
+padding:9px 12px;
+margin:3px;
+border:0;
+border-radius:8px;
+background:#659044;
+color:white;
+font-weight:bold;
+cursor:pointer
+}
+#xv-status{
+margin-top:10px;
+padding:9px;
+background:#17110d;
+border-radius:8px;
+font-size:12px
+}
+#xv-progress{
+height:8px;
+margin-top:8px;
+background:#17110d;
+border-radius:10px;
+overflow:hidden
+}
+#xv-bar{
+height:100%;
+width:0%;
+background:linear-gradient(90deg,#76b34b,#dbc65b)
+}
+\`;
+
+document.head.appendChild(style);
+
+const panel = document.createElement("div");
+
+panel.id = "xitos-valley";
+
+panel.innerHTML = \`
+<div id="xv-head">🌾 Xitos Valley</div>
+
+<div id="xv-body">
+
+<label>⚡ Velocidade</label>
+
+<input
+id="xv-speed"
+class="xv-input"
+type="number"
+value="35"
+min="5"
+max="1000">
+
+<button class="xv-btn" id="xv-start">
+▶ INICIAR
+</button>
+
+<button class="xv-btn" id="xv-stop">
+■ PARAR
+</button>
+
+<div id="xv-status">
+🟢 Pronto
+</div>
+
+<div id="xv-progress">
+<div id="xv-bar"></div>
+</div>
+
+<div style="text-align:center;margin-top:10px">
+🐱 🌱 🪨 🐔
+</div>
+
+</div>
+\`;
+
+document.body.appendChild(panel);
+
+const speed =
+panel.querySelector("#xv-speed");
+
+const status =
+panel.querySelector("#xv-status");
+
+const bar =
+panel.querySelector("#xv-bar");
+
+let running = false;
+
+function auth() {
+return {
+Authorization: "Bearer " + KEY
+};
+}
+
+async function api(path, options = {}) {
+
+const response = await fetch(
+API + path,
+{
+...options,
+headers:{
+...auth(),
+...(options.headers || {})
+}
+}
+);
+
+const data = await response.json();
+
+if (!response.ok)
+throw new Error(
+data.error || "Erro na API"
+);
+
+return data;
+}
+
+function target() {
+
+const active =
+document.activeElement;
+
+if(
+active &&
+(
+active.tagName === "TEXTAREA" ||
+active.tagName === "INPUT" ||
+active.isContentEditable
+)
+)
+return active;
+
+return document.querySelector(
+"textarea,input:not([type=hidden]),[contenteditable=true]"
+);
+}
+
+function insert(el,char){
+
+if(el.isContentEditable){
+
+document.execCommand(
+"insertText",
+false,
+char
+);
+
+return;
+}
+
+const start =
+el.selectionStart ?? el.value.length;
+
+const end =
+el.selectionEnd ?? el.value.length;
+
+el.setRangeText(
+char,
+start,
+end,
+"end"
+);
+
+el.dispatchEvent(
+new InputEvent("input",{
+bubbles:true,
+inputType:"insertText",
+data:char
+})
+);
+
+}
+
+async function run(job){
+
+const el = target();
+
+if(!el)
+throw new Error(
+"Nenhum campo editável encontrado."
+);
+
+el.focus();
+
+const text = job.text;
+
+for(let i=0;i<text.length;i++){
+
+if(!running)
+throw new Error("STOP");
+
+let delay =
+Number(speed.value)||35;
+
+if(job.options?.variation)
+delay += Math.random()*20-10;
+
+await new Promise(
+r=>setTimeout(
+r,
+Math.max(5,delay)
+)
+);
+
+insert(el,text[i]);
+
+const progress =
+Math.round(
+((i+1)/text.length)*100
+);
+
+bar.style.width =
+progress+"%";
+
+if((i+1)%10===0){
+
+await api(
+\`/v1/jobs/\${job.id}/status\`,
+{
+method:"POST",
+headers:{
+"Content-Type":
+"application/json"
+},
+body:JSON.stringify({
+status:"typing",
+progress,
+done:i+1
+})
+}
+);
+
+}
+
+}
+
+await api(
+\`/v1/jobs/\${job.id}/status\`,
+{
+method:"POST",
+headers:{
+"Content-Type":
+"application/json"
+},
+body:JSON.stringify({
+status:"completed",
+progress:100,
+done:text.length
+})
+}
+);
+
+}
+
+async function loop(){
+
+while(running){
+
+try{
+
+status.textContent =
+"🔎 Procurando job...";
+
+const data =
+await api("/v1/jobs/next");
+
+if(!data.job){
+
+status.textContent =
+"🌙 Fila vazia";
+
+await new Promise(
+r=>setTimeout(r,3000)
+);
+
+continue;
+}
+
+bar.style.width="0%";
+
+status.textContent =
+"✏️ Digitando...";
+
+await run(data.job);
+
+status.textContent =
+"🌟 Concluído!";
+
+}catch(error){
+
+if(error.message==="STOP")
+status.textContent="⏹️ Parado";
+else
+status.textContent="❌ "+error.message;
+
+running=false;
+
+}
+
+}
+
+}
+
+panel
+.querySelector("#xv-start")
+.onclick=()=>{
+
+if(running)return;
+
+running=true;
+
+status.textContent =
+"🌱 Xitos iniciado!";
+
+loop();
+
+};
+
+panel
+.querySelector("#xv-stop")
+.onclick=()=>{
+
+running=false;
+
+status.textContent =
+"⏹️ Parando...";
+
+};
+
+console.log(
+"%c🌾 Xitos Valley conectado!",
+"color:#8bc34a;font-size:18px;font-weight:bold"
+);
+
+})();
+
+`;
+
+/*
+=========================================================
+REQUEST HANDLER
+=========================================================
+*/
 
 export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, { headers: cors() });
-    }
+async fetch(request, env) {
 
-    // =====================================================
-    // HOME
-    // =====================================================
+if(request.method === "OPTIONS")
+return new Response(null,{
+status:204,
+headers:cors
+});
 
-    if (request.method === "GET" && url.pathname === "/") {
-      return json({
-        ok: true,
-        name: "Xitos API",
-        version: "1.1.0",
-        status: "online"
-      });
-    }
+const url =
+new URL(request.url);
 
-    // =====================================================
-    // CRIAR JOB
-    // =====================================================
+/*
+HOME
+*/
 
-    if (
-      request.method === "POST" &&
-      url.pathname === "/v1/type"
-    ) {
-      if (!(await auth(request, env))) {
-        return json({
-          ok: false,
-          error: "API Key inválida."
-        }, 401);
-      }
+if(
+request.method === "GET" &&
+url.pathname === "/"
+){
 
-      let body;
+return json({
+ok:true,
+name:"Xitos API",
+version:"1.2.0",
+status:"online"
+});
 
-      try {
-        body = await request.json();
-      } catch {
-        return json({
-          ok: false,
-          error: "JSON inválido."
-        }, 400);
-      }
+}
 
-      if (
-        typeof body.text !== "string" ||
-        !body.text.trim()
-      ) {
-        return json({
-          ok: false,
-          error: "O campo text é obrigatório."
-        }, 400);
-      }
+/*
+CLIENT
+*/
 
-      if (body.text.length > 20000) {
-        return json({
-          ok: false,
-          error: "Limite de 20.000 caracteres."
-        }, 400);
-      }
+if(
+request.method === "GET" &&
+url.pathname === "/v1/client"
+){
 
-      const jobId =
-        "job_" +
-        crypto.randomUUID().replaceAll("-", "");
+if(!validKey(request,env))
+return json({
+ok:false,
+error:"API Key inválida."
+},401);
 
-      const job = {
-        id: jobId,
-        status: "queued",
+return json({
+ok:true,
+version:"1.2.0",
+code:CLIENT_CODE
+});
 
-        text: body.text,
+}
 
-        options: {
-          speed: Math.max(
-            5,
-            Math.min(
-              1000,
-              Number(body.speed) || 35
-            )
-          ),
+/*
+SEU RESTANTE DA API
+*/
 
-          simulateErrors:
-            body.simulateErrors === true,
+return json({
+ok:false,
+error:"Endpoint não encontrado."
+},404);
 
-          variation:
-            body.variation !== false
-        },
+}
 
-        progress: 0,
-
-        characters: {
-          done: 0,
-          total: body.text.length
-        },
-
-        createdAt: new Date().toISOString()
-      };
-
-      await env.JOBS.put(
-        `job:${jobId}`,
-        JSON.stringify(job),
-        {
-          expirationTtl: 3600
-        }
-      );
-
-      // fila simples
-      await env.JOBS.put(
-        `queue:${jobId}`,
-        "1",
-        {
-          expirationTtl: 3600
-        }
-      );
-
-      return json({
-        ok: true,
-        job: {
-          id: jobId,
-          status: "queued"
-        }
-      });
-    }
-
-    // =====================================================
-    // PEGAR PRÓXIMO JOB
-    // =====================================================
-
-    if (
-      request.method === "GET" &&
-      url.pathname === "/v1/jobs/next"
-    ) {
-      if (!(await auth(request, env))) {
-        return json({
-          ok: false,
-          error: "API Key inválida."
-        }, 401);
-      }
-
-      const list =
-        await env.JOBS.list({
-          prefix: "queue:"
-        });
-
-      if (!list.keys.length) {
-        return json({
-          ok: true,
-          job: null
-        });
-      }
-
-      const key =
-        list.keys[0].name;
-
-      const jobId =
-        key.replace("queue:", "");
-
-      const raw =
-        await env.JOBS.get(
-          `job:${jobId}`
-        );
-
-      if (!raw) {
-        await env.JOBS.delete(key);
-
-        return json({
-          ok: true,
-          job: null
-        });
-      }
-
-      const job = JSON.parse(raw);
-
-      job.status = "claimed";
-
-      await env.JOBS.put(
-        `job:${jobId}`,
-        JSON.stringify(job),
-        {
-          expirationTtl: 3600
-        }
-      );
-
-      await env.JOBS.delete(key);
-
-      return json({
-        ok: true,
-        job
-      });
-    }
-
-    // =====================================================
-    // ATUALIZAR JOB
-    // =====================================================
-
-    if (
-      request.method === "POST" &&
-      url.pathname.match(
-        /^\/v1\/jobs\/[^/]+\/status$/
-      )
-    ) {
-      if (!(await auth(request, env))) {
-        return json({
-          ok: false,
-          error: "API Key inválida."
-        }, 401);
-      }
-
-      const jobId =
-        url.pathname.split("/")[3];
-
-      const raw =
-        await env.JOBS.get(
-          `job:${jobId}`
-        );
-
-      if (!raw) {
-        return json({
-          ok: false,
-          error: "Job não encontrado."
-        }, 404);
-      }
-
-      let body;
-
-      try {
-        body = await request.json();
-      } catch {
-        return json({
-          ok: false,
-          error: "JSON inválido."
-        }, 400);
-      }
-
-      const job = JSON.parse(raw);
-
-      const allowed = [
-        "claimed",
-        "typing",
-        "completed",
-        "cancelled",
-        "error"
-      ];
-
-      if (
-        typeof body.status === "string" &&
-        allowed.includes(body.status)
-      ) {
-        job.status = body.status;
-      }
-
-      if (
-        Number.isFinite(body.progress)
-      ) {
-        job.progress =
-          Math.max(
-            0,
-            Math.min(100, body.progress)
-          );
-      }
-
-      if (
-        Number.isFinite(body.done)
-      ) {
-        job.characters.done =
-          Math.max(0, body.done);
-      }
-
-      await env.JOBS.put(
-        `job:${jobId}`,
-        JSON.stringify(job),
-        {
-          expirationTtl: 3600
-        }
-      );
-
-      return json({
-        ok: true,
-        job
-      });
-    }
-
-    // =====================================================
-    // CONSULTAR JOB
-    // =====================================================
-
-    if (
-      request.method === "GET" &&
-      url.pathname.startsWith("/v1/jobs/")
-    ) {
-      if (!(await auth(request, env))) {
-        return json({
-          ok: false,
-          error: "API Key inválida."
-        }, 401);
-      }
-
-      const jobId =
-        url.pathname.split("/").pop();
-
-      const raw =
-        await env.JOBS.get(
-          `job:${jobId}`
-        );
-
-      if (!raw) {
-        return json({
-          ok: false,
-          error: "Job não encontrado."
-        }, 404);
-      }
-
-      return json({
-        ok: true,
-        job: JSON.parse(raw)
-      });
-    }
-
-    return json({
-      ok: false,
-      error: "Endpoint não encontrado."
-    }, 404);
-  }
 };
