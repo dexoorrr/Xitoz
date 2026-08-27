@@ -83,225 +83,625 @@ function makeId(prefix = "job") {
 
 const CLIENT_CODE = `
 
-(async () => {
+(() => {
 
 const API = API_URL;
 const KEY = API_KEY;
 
-document.getElementById("xitos-valley")?.remove();
-document.getElementById("xitos-style")?.remove();
+document.getElementById("xitos-mc")?.remove();
+document.getElementById("xitos-mc-style")?.remove();
+
+const themes = {
+
+    plains: {
+        name: "Planícies",
+        icon: "🌾",
+        sky: "#74b9e6",
+        main: "#5f9d3b",
+        dark: "#26351e",
+        panel: "#30251b",
+        border: "#d1a85b",
+        accent: "#79c34b"
+    },
+
+    forest: {
+        name: "Floresta",
+        icon: "🌲",
+        sky: "#39734a",
+        main: "#3d7b36",
+        dark: "#1d321e",
+        panel: "#292018",
+        border: "#9b743c",
+        accent: "#5fb84d"
+    },
+
+    taiga: {
+        name: "Taiga",
+        icon: "🌲",
+        sky: "#71959c",
+        main: "#52775b",
+        dark: "#202b2b",
+        panel: "#252321",
+        border: "#b28b58",
+        accent: "#82b878"
+    },
+
+    desert: {
+        name: "Deserto",
+        icon: "🏜️",
+        sky: "#e5b96c",
+        main: "#b88939",
+        dark: "#49351d",
+        panel: "#392719",
+        border: "#d6ae62",
+        accent: "#e0b34d"
+    },
+
+    snow: {
+        name: "Picos Nevados",
+        icon: "❄️",
+        sky: "#a8cce4",
+        main: "#668fa9",
+        dark: "#263847",
+        panel: "#263039",
+        border: "#bcd5e3",
+        accent: "#8ed1ef"
+    },
+
+    nether: {
+        name: "Nether",
+        icon: "🔥",
+        sky: "#711d1d",
+        main: "#a52d20",
+        dark: "#260d0d",
+        panel: "#211111",
+        border: "#bd6534",
+        accent: "#ff6a2a"
+    },
+
+    end: {
+        name: "The End",
+        icon: "🟣",
+        sky: "#342a50",
+        main: "#69519c",
+        dark: "#171322",
+        panel: "#211b2d",
+        border: "#9c7ad1",
+        accent: "#bd82ed"
+    }
+
+};
+
+const locations = {
+
+    village: ["🏘️", "Vila"],
+    cave: ["⛏️", "Caverna"],
+    castle: ["🏰", "Castelo"],
+    jungle: ["🌴", "Templo da Selva"],
+    ocean: ["🌊", "Monumento Oceânico"],
+    mine: ["🛤️", "Mina Abandonada"],
+    fortress: ["🔥", "Fortaleza do Nether"],
+    endcity: ["🏯", "Cidade do End"]
+
+};
+
+let settings = JSON.parse(
+    localStorage.getItem("xitos-settings") ||
+    "null"
+) || {
+
+    theme: "plains",
+    location: "village",
+    accent: "#79c34b",
+    dark: true,
+    particles: true
+
+};
+
+let running = false;
+let minimized = false;
+let dragging = false;
+
+let dragX = 0;
+let dragY = 0;
 
 /* =========================================================
    STYLE
 ========================================================= */
 
-const style = document.createElement("style");
+const style =
+document.createElement("style");
 
-style.id = "xitos-style";
+style.id =
+"xitos-mc-style";
 
 style.textContent = \`
 
-#xitos-valley {
+@import url(
+'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'
+);
+
+#xitos-mc {
+
+    --main: #5f9d3b;
+    --dark: #26351e;
+    --panel: #30251b;
+    --border: #d1a85b;
+    --accent: #79c34b;
+
     position: fixed;
-    right: 20px;
-    bottom: 20px;
-    width: 340px;
+
+    right: 22px;
+    bottom: 22px;
+
+    width: 360px;
+
     z-index: 2147483647;
+
+    color: #fff;
 
     font-family:
         Arial,
         sans-serif;
 
-    color: #fff3cf;
-
     background:
         linear-gradient(
-            145deg,
-            #59402a,
-            #2b1d14
+            180deg,
+            var(--panel),
+            #17120e
         );
 
     border:
-        3px solid #c79a55;
+        4px solid var(--border);
 
-    border-radius:
-        18px;
+    border-radius: 8px;
 
     box-shadow:
-        0 15px 45px rgba(0,0,0,.55),
-        inset 0 0 0 1px rgba(255,255,255,.08);
+        0 12px 0 #0006,
+        0 20px 45px #0009,
+        inset 0 0 0 2px #ffffff12;
 
     overflow: hidden;
 
-    user-select: none;
+    image-rendering: pixelated;
+
 }
 
-#xv-head {
-    padding: 13px 15px;
+#xmc-header {
 
-    font-size: 18px;
-    font-weight: bold;
+    height: 65px;
 
-    background:
-        linear-gradient(
-            #78a94f,
-            #466f30
-        );
+    padding: 0 14px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
 
     cursor: move;
+
+    background:
+
+        linear-gradient(
+            180deg,
+            var(--main),
+            var(--dark)
+        );
+
+    border-bottom:
+        3px solid #0005;
+
+    position: relative;
+
 }
 
-#xv-sub {
+#xmc-header:after {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 5px;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #0002 0 5px,
+            transparent 5px 10px
+        );
+
+}
+
+#xmc-logo {
+
+    width: 42px;
+    height: 42px;
+
+    display: grid;
+
+    place-items: center;
+
+    font-size: 25px;
+
+    background:
+        #0004;
+
+    border:
+        2px solid #fff4;
+
+    box-shadow:
+        inset 0 0 0 2px #0003;
+
+}
+
+#xmc-title {
+
+    font-family:
+        'Press Start 2P',
+        monospace;
+
+    font-size: 13px;
+
+    text-shadow:
+        2px 2px #000;
+
+}
+
+#xmc-sub {
+
+    margin-top: 6px;
+
     font-size: 11px;
-    opacity: .75;
-    margin-top: 3px;
+
+    opacity: .8;
+
 }
 
-#xv-close {
-    float: right;
+.xmc-head-btn {
+
+    margin-left: auto;
+
+    display: flex;
+
+    gap: 5px;
+
+}
+
+.xmc-icon-btn {
+
+    width: 30px;
+    height: 30px;
+
+    border: 2px solid #ffffff40;
+
+    background:
+        #0005;
+
+    color: white;
+
     cursor: pointer;
-    opacity: .75;
-    font-size: 20px;
+
+    border-radius: 4px;
+
+    font-size: 16px;
+
 }
 
-#xv-body {
+.xmc-icon-btn:hover {
+
+    background:
+        #fff2;
+
+}
+
+#xmc-body {
+
     padding: 14px;
+
 }
 
-.xv-label {
-    display: block;
-    margin-bottom: 5px;
+.xmc-card {
 
-    font-size: 12px;
-    opacity: .85;
+    background:
+        #0004;
+
+    border:
+        2px solid #ffffff12;
+
+    border-radius: 6px;
+
+    padding: 10px;
+
+    margin-bottom: 10px;
+
 }
 
-.xv-input {
+.xmc-title {
+
+    font-family:
+        'Press Start 2P',
+        monospace;
+
+    font-size: 9px;
+
+    color:
+        var(--accent);
+
+    margin-bottom: 8px;
+
+}
+
+.xmc-row {
+
+    display: flex;
+
+    gap: 7px;
+
+    align-items: center;
+
+}
+
+.xmc-select,
+.xmc-input {
+
+    flex: 1;
+
     width: 100%;
+
     box-sizing: border-box;
 
     padding: 9px;
-    margin-bottom: 10px;
-
-    background: #211711;
-    color: #fff0c5;
-
-    border:
-        2px solid #87643a;
-
-    border-radius: 8px;
-    outline: none;
-}
-
-.xv-input:focus {
-    border-color: #b9d76d;
-}
-
-.xv-btn {
-    padding: 9px 12px;
-    margin: 3px 2px;
-
-    border: 0;
-    border-radius: 8px;
-
-    background:
-        linear-gradient(
-            #78a84d,
-            #547d34
-        );
 
     color: white;
+
+    background:
+        #15110d;
+
+    border:
+        2px solid #6b5134;
+
+    border-radius: 4px;
+
+    outline: none;
+
+}
+
+.xmc-select:focus,
+.xmc-input:focus {
+
+    border-color:
+        var(--accent);
+
+}
+
+.xmc-range {
+
+    width: 100%;
+
+    accent-color:
+        var(--accent);
+
+}
+
+.xmc-btn {
+
+    border: 0;
+
+    padding: 10px 13px;
+
+    border-radius: 4px;
+
+    color: white;
+
     font-weight: bold;
 
     cursor: pointer;
 
-    box-shadow:
-        0 3px #354e25;
-}
-
-.xv-btn:hover {
-    filter: brightness(1.12);
-}
-
-.xv-btn:active {
-    transform: translateY(2px);
-    box-shadow: none;
-}
-
-.xv-danger {
     background:
         linear-gradient(
-            #a75b51,
-            #753c36
+            #76b843,
+            #477629
         );
 
     box-shadow:
-        0 3px #4e2925;
+        0 3px #263f19;
+
 }
 
-#xv-status {
-    margin-top: 10px;
+.xmc-btn:hover {
+
+    filter:
+        brightness(1.15);
+
+}
+
+.xmc-btn:active {
+
+    transform:
+        translateY(2px);
+
+    box-shadow:
+        none;
+
+}
+
+.xmc-stop {
+
+    background:
+        linear-gradient(
+            #a94b3f,
+            #702d27
+        );
+
+    box-shadow:
+        0 3px #481c18;
+
+}
+
+#xmc-status {
 
     padding: 9px;
 
-    background: #17100c;
+    font-size: 11px;
 
-    border-radius: 8px;
-
-    font-size: 12px;
+    background:
+        #0006;
 
     border:
-        1px solid #473323;
+        2px solid #ffffff0c;
+
+    border-radius: 4px;
+
 }
 
-#xv-progress {
-    height: 9px;
+#xmc-progress {
 
-    margin-top: 9px;
+    height: 13px;
 
-    background: #17100c;
+    margin-top: 8px;
 
-    border-radius: 10px;
+    background:
+        #101010;
+
+    border:
+        2px solid #080808;
 
     overflow: hidden;
 
-    border:
-        1px solid #473323;
 }
 
-#xv-bar {
+#xmc-bar {
+
     height: 100%;
+
     width: 0%;
 
     background:
         linear-gradient(
             90deg,
-            #76b34b,
-            #d8c45d
+            #62a832,
+            #9bdb55
         );
+
+    box-shadow:
+        inset 0 2px #ffffff30;
 
     transition:
         width .1s linear;
+
 }
 
-#xv-icons {
-    text-align: center;
+#xmc-percent {
 
-    margin-top: 11px;
-
-    font-size: 17px;
-
-    letter-spacing: 3px;
-}
-
-#xv-version {
     text-align: right;
 
     font-size: 9px;
 
-    opacity: .4;
+    margin-top: 3px;
 
-    margin-top: 7px;
+    opacity: .6;
+
+}
+
+#xmc-footer {
+
+    text-align: center;
+
+    padding-top: 5px;
+
+    font-size: 16px;
+
+    letter-spacing: 5px;
+
+}
+
+#xmc-particles {
+
+    position: absolute;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    overflow: hidden;
+
+}
+
+.xmc-particle {
+
+    position: absolute;
+
+    animation:
+        xmc-float 4s linear infinite;
+
+    opacity: .35;
+
+}
+
+@keyframes xmc-float {
+
+    from {
+
+        transform:
+            translateY(70px);
+
+        opacity: 0;
+
+    }
+
+    30% {
+
+        opacity: .4;
+
+    }
+
+    to {
+
+        transform:
+            translateY(-30px);
+
+        opacity: 0;
+
+    }
+
+}
+
+#xmc-minimized {
+
+    position: fixed;
+
+    right: 22px;
+    bottom: 22px;
+
+    width: 60px;
+    height: 60px;
+
+    z-index: 2147483647;
+
+    display: none;
+
+    place-items: center;
+
+    font-size: 28px;
+
+    cursor: pointer;
+
+    background:
+        var(--main);
+
+    border:
+        4px solid var(--border);
+
+    border-radius: 6px;
+
+    box-shadow:
+        0 8px 20px #0008;
+
 }
 
 \`;
@@ -313,91 +713,174 @@ document.head.appendChild(style);
 ========================================================= */
 
 const panel =
-    document.createElement("div");
+document.createElement("div");
 
 panel.id =
-    "xitos-valley";
+"xitos-mc";
 
 panel.innerHTML = \`
 
-<div id="xv-head">
+<div id="xmc-particles"></div>
 
-    <span id="xv-close">
-        ×
-    </span>
+<div id="xmc-header">
 
-    🌾 Xitos Valley
+    <div id="xmc-logo">
+        ⛏️
+    </div>
 
-    <div id="xv-sub">
-        Connector online
+    <div>
+
+        <div id="xmc-title">
+            XITOS
+        </div>
+
+        <div id="xmc-sub">
+            Survival Edition
+        </div>
+
+    </div>
+
+    <div class="xmc-head-btn">
+
+        <button
+            class="xmc-icon-btn"
+            id="xmc-min"
+        >
+            −
+        </button>
+
+        <button
+            class="xmc-icon-btn"
+            id="xmc-close"
+        >
+            ×
+        </button>
+
     </div>
 
 </div>
 
-<div id="xv-body">
+<div id="xmc-body">
 
-    <label class="xv-label">
-        ⚡ Velocidade (ms)
-    </label>
+    <div class="xmc-card">
 
-    <input
-        id="xv-speed"
-        class="xv-input"
-        type="number"
-        value="35"
-        min="5"
-        max="2000"
-    >
+        <div class="xmc-title">
+            🌍 MUNDO
+        </div>
 
-    <label class="xv-label">
-        🎲 Variação
-    </label>
+        <div class="xmc-row">
 
-    <select
-        id="xv-variation"
-        class="xv-input"
-    >
+            <select
+                id="xmc-theme"
+                class="xmc-select"
+            ></select>
 
-        <option value="false">
-            Normal
-        </option>
+            <select
+                id="xmc-location"
+                class="xmc-select"
+            ></select>
 
-        <option value="true" selected>
-            Natural
-        </option>
-
-    </select>
-
-    <button
-        class="xv-btn"
-        id="xv-start"
-    >
-        ▶ INICIAR
-    </button>
-
-    <button
-        class="xv-btn xv-danger"
-        id="xv-stop"
-    >
-        ■ PARAR
-    </button>
-
-    <div id="xv-status">
-        🟢 Pronto
-    </div>
-
-    <div id="xv-progress">
-
-        <div id="xv-bar"></div>
+        </div>
 
     </div>
 
-    <div id="xv-icons">
-        🐱 🌱 🪨 🐔
+    <div class="xmc-card">
+
+        <div class="xmc-title">
+            ⚡ VELOCIDADE
+        </div>
+
+        <input
+            id="xmc-speed"
+            class="xmc-range"
+            type="range"
+            min="5"
+            max="500"
+            value="35"
+        >
+
+        <div
+            id="xmc-speed-label"
+            style="
+            text-align:center;
+            margin-top:5px;
+            font-size:11px
+            "
+        >
+            35 ms
+        </div>
+
     </div>
 
-    <div id="xv-version">
-        Xitos Connector
+    <div class="xmc-card">
+
+        <div class="xmc-title">
+            🎨 PERSONALIZAÇÃO
+        </div>
+
+        <div class="xmc-row">
+
+            <input
+                id="xmc-color"
+                class="xmc-input"
+                type="color"
+                value="#79c34b"
+                style="height:38px"
+            >
+
+            <button
+                class="xmc-btn"
+                id="xmc-particles-btn"
+            >
+                ✨ Partículas
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="xmc-card">
+
+        <div class="xmc-title">
+            📜 OPERAÇÃO
+        </div>
+
+        <div class="xmc-row">
+
+            <button
+                class="xmc-btn"
+                id="xmc-start"
+            >
+                ▶ INICIAR
+            </button>
+
+            <button
+                class="xmc-btn xmc-stop"
+                id="xmc-stop"
+            >
+                ■ PARAR
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="xmc-status">
+        🟢 Mundo carregado.
+    </div>
+
+    <div id="xmc-progress">
+
+        <div id="xmc-bar"></div>
+
+    </div>
+
+    <div id="xmc-percent">
+        0%
+    </div>
+
+    <div id="xmc-footer">
+        🐷 🌳 🐔 🧱
     </div>
 
 </div>
@@ -407,90 +890,353 @@ panel.innerHTML = \`
 document.body.appendChild(panel);
 
 /* =========================================================
+   MINIMIZED
+========================================================= */
+
+const minimized =
+document.createElement("div");
+
+minimized.id =
+"xmc-minimized";
+
+minimized.textContent =
+"⛏️";
+
+document.body.appendChild(
+    minimized
+);
+
+/* =========================================================
    ELEMENTS
 ========================================================= */
 
-const speed =
-    panel.querySelector("#xv-speed");
+const themeSelect =
+panel.querySelector(
+    "#xmc-theme"
+);
 
-const variation =
-    panel.querySelector("#xv-variation");
+const locationSelect =
+panel.querySelector(
+    "#xmc-location"
+);
+
+const speedInput =
+panel.querySelector(
+    "#xmc-speed"
+);
+
+const speedLabel =
+panel.querySelector(
+    "#xmc-speed-label"
+);
+
+const colorInput =
+panel.querySelector(
+    "#xmc-color"
+);
 
 const status =
-    panel.querySelector("#xv-status");
+panel.querySelector(
+    "#xmc-status"
+);
 
 const bar =
-    panel.querySelector("#xv-bar");
+panel.querySelector(
+    "#xmc-bar"
+);
 
-const close =
-    panel.querySelector("#xv-close");
+const percent =
+panel.querySelector(
+    "#xmc-percent"
+);
 
-let running = false;
-
-/* =========================================================
-   CLOSE
-========================================================= */
-
-close.onclick = () => {
-
-    running = false;
-
-    panel.remove();
-    style.remove();
-
-};
+const particles =
+panel.querySelector(
+    "#xmc-particles"
+);
 
 /* =========================================================
-   API
+   THEMES
 ========================================================= */
 
-async function api(path, options = {}) {
+Object.entries(themes)
+.forEach(
+([id, theme]) => {
 
-    const response =
-        await fetch(
-            API + path,
-            {
-                ...options,
-
-                headers: {
-                    Authorization:
-                        "Bearer " + KEY,
-
-                    ...(options.headers || {})
-                }
-            }
+    const option =
+        document.createElement(
+            "option"
         );
 
-    let data;
+    option.value = id;
 
-    try {
+    option.textContent =
+        theme.icon +
+        " " +
+        theme.name;
 
-        data =
-            await response.json();
+    themeSelect.appendChild(
+        option
+    );
 
-    } catch {
+}
+);
 
-        throw new Error(
-            "Resposta inválida da API."
+/* =========================================================
+   LOCATIONS
+========================================================= */
+
+Object.entries(locations)
+.forEach(
+([id, value]) => {
+
+    const option =
+        document.createElement(
+            "option"
         );
 
-    }
+    option.value = id;
 
-    if (!response.ok) {
+    option.textContent =
+        value[0] +
+        " " +
+        value[1];
 
-        throw new Error(
-            data.error ||
-            "Erro na API."
-        );
+    locationSelect.appendChild(
+        option
+    );
 
-    }
+}
+);
 
-    return data;
+/* =========================================================
+   SAVE
+========================================================= */
+
+function save() {
+
+    localStorage.setItem(
+        "xitos-settings",
+        JSON.stringify(
+            settings
+        )
+    );
 
 }
 
 /* =========================================================
-   FIND TARGET
+   APPLY THEME
+========================================================= */
+
+function applyTheme() {
+
+    const theme =
+        themes[
+            settings.theme
+        ];
+
+    panel.style.setProperty(
+        "--main",
+        theme.main
+    );
+
+    panel.style.setProperty(
+        "--dark",
+        theme.dark
+    );
+
+    panel.style.setProperty(
+        "--panel",
+        theme.panel
+    );
+
+    panel.style.setProperty(
+        "--border",
+        theme.border
+    );
+
+    panel.style.setProperty(
+        "--accent",
+        settings.accent ||
+        theme.accent
+    );
+
+    themeSelect.value =
+        settings.theme;
+
+    locationSelect.value =
+        settings.location;
+
+    colorInput.value =
+        settings.accent ||
+        theme.accent;
+
+    speedInput.value =
+        settings.speed ||
+        35;
+
+    speedLabel.textContent =
+        speedInput.value +
+        " ms";
+
+    particles.style.display =
+        settings.particles ?
+        "block" :
+        "none";
+
+}
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+function createParticles() {
+
+    particles.innerHTML = "";
+
+    if (!settings.particles)
+        return;
+
+    const chars = [
+        "✦",
+        "•",
+        "🍃",
+        "✨"
+    ];
+
+    for (
+        let i = 0;
+        i < 12;
+        i++
+    ) {
+
+        const p =
+            document.createElement(
+                "span"
+            );
+
+        p.className =
+            "xmc-particle";
+
+        p.textContent =
+            chars[
+                Math.floor(
+                    Math.random() *
+                    chars.length
+                )
+            ];
+
+        p.style.left =
+            Math.random() * 100 +
+            "%";
+
+        p.style.top =
+            Math.random() * 100 +
+            "%";
+
+        p.style.animationDelay =
+            Math.random() * 4 +
+            "s";
+
+        particles.appendChild(
+            p
+        );
+
+    }
+
+}
+
+/* =========================================================
+   SETTINGS EVENTS
+========================================================= */
+
+themeSelect.onchange = () => {
+
+    settings.theme =
+        themeSelect.value;
+
+    settings.accent =
+        themes[
+            settings.theme
+        ].accent;
+
+    applyTheme();
+    createParticles();
+    save();
+
+    status.textContent =
+        "🌍 Bioma alterado para " +
+        themes[
+            settings.theme
+        ].name +
+        ".";
+
+};
+
+locationSelect.onchange = () => {
+
+    settings.location =
+        locationSelect.value;
+
+    save();
+
+    const loc =
+        locations[
+            settings.location
+        ];
+
+    status.textContent =
+        loc[0] +
+        " Localização: " +
+        loc[1];
+
+};
+
+speedInput.oninput = () => {
+
+    settings.speed =
+        Number(
+            speedInput.value
+        );
+
+    speedLabel.textContent =
+        speedInput.value +
+        " ms";
+
+    save();
+
+};
+
+colorInput.oninput = () => {
+
+    settings.accent =
+        colorInput.value;
+
+    panel.style.setProperty(
+        "--accent",
+        settings.accent
+    );
+
+    save();
+
+};
+
+panel
+.querySelector(
+    "#xmc-particles-btn"
+)
+.onclick = () => {
+
+    settings.particles =
+        !settings.particles;
+
+    createParticles();
+    save();
+
+};
+
+/* =========================================================
+   TARGET
 ========================================================= */
 
 function target() {
@@ -501,11 +1247,14 @@ function target() {
     if (
         active &&
         (
-            active.tagName === "TEXTAREA" ||
+            active.tagName ===
+                "TEXTAREA" ||
 
             (
-                active.tagName === "INPUT" &&
-                active.type !== "hidden"
+                active.tagName ===
+                    "INPUT" &&
+                active.type !==
+                    "hidden"
             ) ||
 
             active.isContentEditable
@@ -517,22 +1266,22 @@ function target() {
     }
 
     return document.querySelector(
-        [
-            "textarea",
-            "input:not([type=hidden])",
-            "[contenteditable=true]"
-        ].join(",")
+        "textarea," +
+        "input:not([type=hidden])," +
+        "[contenteditable=true]"
     );
 
 }
 
 /* =========================================================
-   INSERT CHARACTER
+   INSERT
 ========================================================= */
 
 function insert(el, char) {
 
-    if (el.isContentEditable) {
+    if (
+        el.isContentEditable
+    ) {
 
         document.execCommand(
             "insertText",
@@ -583,7 +1332,61 @@ function insert(el, char) {
 }
 
 /* =========================================================
-   RUN JOB
+   API
+========================================================= */
+
+async function api(
+    path,
+    options = {}
+) {
+
+    const response =
+        await fetch(
+            API + path,
+            {
+                ...options,
+
+                headers: {
+                    Authorization:
+                        "Bearer " +
+                        KEY,
+
+                    ...(options.headers ||
+                        {})
+                }
+            }
+        );
+
+    let data;
+
+    try {
+
+        data =
+            await response.json();
+
+    } catch {
+
+        throw new Error(
+            "Resposta inválida."
+        );
+
+    }
+
+    if (!response.ok) {
+
+        throw new Error(
+            data.error ||
+            "Erro na API."
+        );
+
+    }
+
+    return data;
+
+}
+
+/* =========================================================
+   RUN
 ========================================================= */
 
 async function run(job) {
@@ -594,7 +1397,7 @@ async function run(job) {
     if (!el) {
 
         throw new Error(
-            "Nenhum campo editável encontrado."
+            "Clique em um campo de texto primeiro."
         );
 
     }
@@ -602,7 +1405,9 @@ async function run(job) {
     el.focus();
 
     const text =
-        String(job.text || "");
+        String(
+            job.text || ""
+        );
 
     for (
         let i = 0;
@@ -619,14 +1424,18 @@ async function run(job) {
         }
 
         let delay =
-            Number(speed.value) || 35;
+            Number(
+                speedInput.value
+            ) || 35;
 
         if (
-            variation.value === "true"
+            job.options?.variation
         ) {
 
             delay +=
-                Math.random() * 20 - 10;
+                Math.random() *
+                20 -
+                10;
 
         }
 
@@ -646,15 +1455,19 @@ async function run(job) {
             text[i]
         );
 
-        const progress =
+        const p =
             Math.round(
-                ((i + 1) /
-                    text.length) *
-                100
+                (
+                    (i + 1) /
+                    text.length
+                ) * 100
             );
 
         bar.style.width =
-            progress + "%";
+            p + "%";
+
+        percent.textContent =
+            p + "%";
 
         if (
             (i + 1) % 10 === 0 ||
@@ -663,7 +1476,9 @@ async function run(job) {
 
             await api(
                 "/v1/jobs/" +
-                encodeURIComponent(job.id) +
+                encodeURIComponent(
+                    job.id
+                ) +
                 "/status",
                 {
                     method: "POST",
@@ -675,10 +1490,17 @@ async function run(job) {
 
                     body:
                         JSON.stringify({
-                            status: "typing",
-                            progress,
-                            done: i + 1,
-                            total: text.length
+                            status:
+                                "typing",
+
+                            progress:
+                                p,
+
+                            done:
+                                i + 1,
+
+                            total:
+                                text.length
                         })
                 }
             );
@@ -690,7 +1512,7 @@ async function run(job) {
 }
 
 /* =========================================================
-   JOB LOOP
+   LOOP
 ========================================================= */
 
 async function loop() {
@@ -710,7 +1532,7 @@ async function loop() {
             if (!data.job) {
 
                 status.textContent =
-                    "🌙 Fila vazia";
+                    "🌙 Nenhum job na fila.";
 
                 await new Promise(
                     resolve =>
@@ -725,6 +1547,9 @@ async function loop() {
             }
 
             bar.style.width =
+                "0%";
+
+            percent.textContent =
                 "0%";
 
             status.textContent =
@@ -753,7 +1578,8 @@ async function loop() {
                             status:
                                 "completed",
 
-                            progress: 100,
+                            progress:
+                                100,
 
                             done:
                                 String(
@@ -765,16 +1591,17 @@ async function loop() {
             );
 
             status.textContent =
-                "🌟 Concluído!";
+                "🌟 Job concluído!";
 
         } catch (error) {
 
             if (
-                error.message === "STOP"
+                error.message ===
+                "STOP"
             ) {
 
                 status.textContent =
-                    "⏹️ Parado";
+                    "⏹️ Operação parada.";
 
             } else {
 
@@ -802,64 +1629,127 @@ async function loop() {
 ========================================================= */
 
 panel
-    .querySelector("#xv-start")
-    .onclick = () => {
+.querySelector(
+    "#xmc-start"
+)
+.onclick = () => {
 
-        if (running)
-            return;
+    if (running)
+        return;
 
-        running = true;
+    running = true;
 
-        status.textContent =
-            "🌱 Xitos iniciado!";
+    status.textContent =
+        "🌱 Xitos iniciado!";
 
-        loop();
+    loop();
 
-    };
+};
 
 panel
-    .querySelector("#xv-stop")
-    .onclick = () => {
+.querySelector(
+    "#xmc-stop"
+)
+.onclick = () => {
 
-        running = false;
+    running = false;
 
-        status.textContent =
-            "⏹️ Parando...";
+    status.textContent =
+        "⏹️ Parando...";
 
-    };
+};
+
+/* =========================================================
+   MINIMIZE
+========================================================= */
+
+panel
+.querySelector(
+    "#xmc-min"
+)
+.onclick = () => {
+
+    minimized.style.display =
+        "grid";
+
+    panel.style.display =
+        "none";
+
+    minimized.style.setProperty(
+        "--main",
+        themes[
+            settings.theme
+        ].main
+    );
+
+    minimized.style.setProperty(
+        "--border",
+        themes[
+            settings.theme
+        ].border
+    );
+
+};
+
+minimized.onclick = () => {
+
+    minimized.style.display =
+        "none";
+
+    panel.style.display =
+        "block";
+
+};
+
+/* =========================================================
+   CLOSE
+========================================================= */
+
+panel
+.querySelector(
+    "#xmc-close"
+)
+.onclick = () => {
+
+    running = false;
+
+    panel.remove();
+    minimized.remove();
+    style.remove();
+
+};
 
 /* =========================================================
    DRAG
 ========================================================= */
 
-const head =
-    panel.querySelector("#xv-head");
+const header =
+    panel.querySelector(
+        "#xmc-header"
+    );
 
-let dragging = false;
-let offsetX = 0;
-let offsetY = 0;
-
-head.addEventListener(
+header.addEventListener(
     "mousedown",
-    event => {
+    e => {
 
         if (
-            event.target === close
-        ) {
+            e.target.closest(
+                "button"
+            )
+        )
             return;
-        }
 
         dragging = true;
 
         const rect =
             panel.getBoundingClientRect();
 
-        offsetX =
-            event.clientX -
+        dragX =
+            e.clientX -
             rect.left;
 
-        offsetY =
-            event.clientY -
+        dragY =
+            e.clientY -
             rect.top;
 
         panel.style.left =
@@ -879,21 +1769,21 @@ head.addEventListener(
 
 document.addEventListener(
     "mousemove",
-    event => {
+    e => {
 
         if (!dragging)
             return;
 
         panel.style.left =
             (
-                event.clientX -
-                offsetX
+                e.clientX -
+                dragX
             ) + "px";
 
         panel.style.top =
             (
-                event.clientY -
-                offsetY
+                e.clientY -
+                dragY
             ) + "px";
 
     }
@@ -909,21 +1799,75 @@ document.addEventListener(
 );
 
 /* =========================================================
-   EASTER EGGS
+   HOTKEY
 ========================================================= */
 
+document.addEventListener(
+    "keydown",
+    e => {
+
+        if (
+            e.ctrlKey &&
+            e.shiftKey &&
+            e.key.toLowerCase() === "x"
+        ) {
+
+            e.preventDefault();
+
+            if (panel.style.display ===
+                "none") {
+
+                panel.style.display =
+                    "block";
+
+                minimized.style.display =
+                    "none";
+
+            } else {
+
+                panel.style.display =
+                    "none";
+
+                minimized.style.display =
+                    "grid";
+
+            }
+
+        }
+
+    }
+);
+
+/* =========================================================
+   STARTUP
+========================================================= */
+
+applyTheme();
+createParticles();
+
 console.log(
-    "%c🌾 XITOS VALLEY ONLINE",
-    "color:#8bc34a;font-size:20px;font-weight:bold"
+    "%c⛏️ XITOS MINECRAFT EDITION",
+    "color:#79c34b;" +
+    "font-size:20px;" +
+    "font-weight:bold;"
 );
 
 console.log(
-    "%c🐔 A galinha não deveria estar programando isso.",
-    "color:#d8c45d;font-size:12px"
+    "%c🌳 Bioma: " +
+    themes[settings.theme].name,
+    "color:#9bdb55;"
+);
+
+console.log(
+    "%c🏘️ Local: " +
+    locations[settings.location][1],
+    "color:#d1a85b;"
 );
 
 })();
+
 `;
+
 
 /* =========================================================
    WORKER
