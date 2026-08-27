@@ -1,6 +1,6 @@
 name = "xitos-api"
 
-main = "src/index.js"
+main = "index.js"
 
 compatibility_date = "2026-08-27"
 
