@@ -1,9 +1,7 @@
-name = "xitos-api"
-
+name = "xitoz"
 main = "index.js"
-
 compatibility_date = "2026-08-27"
 
 [[kv_namespaces]]
 binding = "JOBS"
-id = "DuzinXitado"
+id = "a80d2786fdb54759a6b441615ba4cf1c"
