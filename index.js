@@ -44,7 +44,6 @@ function json(data, status = 200, request = null) {
             }
         }
     );
-
 }
 
 /* =========================================================
@@ -63,10 +62,7 @@ function getKey(request) {
         return null;
     }
 
-    return auth
-        .slice(7)
-        .trim();
-
+    return auth.slice(7).trim();
 }
 
 function validKey(request, env) {
@@ -86,7 +82,6 @@ function validKey(request, env) {
         .map(k => k.trim())
         .filter(Boolean)
         .includes(key);
-
 }
 
 /* =========================================================
@@ -102,19 +97,18 @@ function makeId(prefix = "job") {
             .randomUUID()
             .replaceAll("-", "")
     );
-
 }
 
 /* =========================================================
-   CLIENT CODE
+   CLIENT
 ========================================================= */
 
 const CLIENT_CODE = `
 
 (() => {
 
-const API = API_URL;
-const KEY = API_KEY;
+const API = "__API_URL__";
+const KEY = "__API_KEY__";
 
 document.getElementById("xitos-mc")?.remove();
 document.getElementById("xitos-mc-style")?.remove();
@@ -221,7 +215,7 @@ const themes = {
 };
 
 /* =========================================================
-   WRITE MODES
+   MODES
 ========================================================= */
 
 const modes = {
@@ -264,22 +258,26 @@ let settings =
     ) || {
 
         theme: "plains",
+
         mode: "normal",
 
         speed: 55,
 
         errorRate: 0,
+
         correction: true,
+
         correctionDelay: 120,
 
         clickSound: true,
+
         volume: 0.25,
 
         particles: true,
 
         bgImage: "",
-        bgOpacity: 0.12
 
+        bgOpacity: 0.12
     };
 
 /* =========================================================
@@ -302,7 +300,6 @@ function save() {
         "xitos-v2-settings",
         JSON.stringify(settings)
     );
-
 }
 
 /* =========================================================
@@ -318,16 +315,16 @@ function clickSound() {
 
     try {
 
-        audioContext ||=
-            new (
-                window.AudioContext ||
-                window.webkitAudioContext
-            )();
+        audioContext ||= new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
 
         if (
             audioContext.state ===
             "suspended"
         ) {
+
             audioContext.resume();
         }
 
@@ -337,8 +334,7 @@ function clickSound() {
         const gain =
             audioContext.createGain();
 
-        osc.type =
-            "square";
+        osc.type = "square";
 
         osc.frequency.value =
             500 +
@@ -371,7 +367,10 @@ function clickSound() {
         );
 
         osc.start();
-        osc.stop(now + 0.04);
+
+        osc.stop(
+            now + 0.04
+        );
 
     } catch {}
 
@@ -411,9 +410,14 @@ style.textContent = \`
     max-width:
         calc(100vw - 24px);
 
-    z-index: 2147483647;
+    max-height:
+        calc(100vh - 30px);
 
-    color: #fff;
+    z-index:
+        2147483647;
+
+    color:
+        #fff;
 
     font-family:
         Arial,
@@ -454,11 +458,13 @@ style.textContent = \`
         0;
 
     background:
-        center / cover
-        no-repeat;
+        center / cover no-repeat;
 
     pointer-events:
         none;
+
+    transition:
+        opacity .2s ease;
 
 }
 
@@ -522,7 +528,7 @@ style.textContent = \`
         #0005;
 
     border:
-        2px solid #fff3;
+        2px solid #ffffff25;
 
     border-radius:
         9px;
@@ -578,7 +584,7 @@ style.textContent = \`
         31px;
 
     border:
-        1px solid #fff3;
+        1px solid #ffffff35;
 
     background:
         #0005;
@@ -665,6 +671,12 @@ style.textContent = \`
 
     padding:
         11px;
+
+    max-height:
+        calc(100vh - 135px);
+
+    overflow-y:
+        auto;
 
 }
 
@@ -901,6 +913,13 @@ style.textContent = \`
 
 }
 
+.xmc-btn:active {
+
+    transform:
+        translateY(1px);
+
+}
+
 .xmc-danger {
 
     background:
@@ -972,7 +991,7 @@ style.textContent = \`
         #0007;
 
     border:
-        1px solid #ffffff0c;
+        1px solid #ffffff0d;
 
     border-radius:
         7px;
@@ -1182,9 +1201,7 @@ panel.innerHTML = \`
 
 <div id="xmc-body">
 
-<!-- =====================================================
-     WRITE
-===================================================== -->
+<!-- WRITE -->
 
 <div
     class="xmc-section active"
@@ -1201,29 +1218,49 @@ panel.innerHTML = \`
             <button
                 class="xmc-mode"
                 data-mode="turtle">
+
                 🐢 Tartaruga
-                <small>Muito lento</small>
+
+                <small>
+                    Muito lento
+                </small>
+
             </button>
 
             <button
                 class="xmc-mode active"
                 data-mode="normal">
+
                 🚶 Normal
-                <small>Natural</small>
+
+                <small>
+                    Natural
+                </small>
+
             </button>
 
             <button
                 class="xmc-mode"
                 data-mode="fast">
+
                 ⚡ Rápido
-                <small>Velocidade alta</small>
+
+                <small>
+                    Velocidade alta
+                </small>
+
             </button>
 
             <button
                 class="xmc-mode"
                 data-mode="insta">
+
                 💨 Insta
-                <small>Quase instantâneo</small>
+
+                <small>
+                    Quase instantâneo
+                </small>
+
             </button>
 
         </div>
@@ -1255,7 +1292,7 @@ panel.innerHTML = \`
         </div>
 
         <div class="xmc-muted">
-            Intervalo médio entre caracteres.
+            Menor valor = mais rápido.
         </div>
 
     </div>
@@ -1286,7 +1323,7 @@ panel.innerHTML = \`
 
         <label class="xmc-switch">
 
-            Corrigir erros automaticamente
+            Corrigir automaticamente
 
             <input
                 id="xmc-correction"
@@ -1309,18 +1346,12 @@ panel.innerHTML = \`
 
         </div>
 
-        <div class="xmc-muted">
-            O texto pode conter erros temporários que
-            são corrigidos depois.
-        </div>
-
     </div>
 
     <div class="xmc-card">
 
-        <div
-            id="xmc-estimate">
-            Estimativa: 0 s
+        <div id="xmc-estimate">
+            ⏱️ Estimativa: 0 s
         </div>
 
     </div>
@@ -1332,13 +1363,17 @@ panel.innerHTML = \`
             <button
                 class="xmc-btn"
                 id="xmc-start">
+
                 ▶ INICIAR
+
             </button>
 
             <button
                 class="xmc-btn xmc-danger"
                 id="xmc-stop">
+
                 ■ PARAR
+
             </button>
 
         </div>
@@ -1347,9 +1382,7 @@ panel.innerHTML = \`
 
 </div>
 
-<!-- =====================================================
-     VISUAL
-===================================================== -->
+<!-- VISUAL -->
 
 <div
     class="xmc-section"
@@ -1383,7 +1416,9 @@ panel.innerHTML = \`
         <div
             id="xmc-image-status"
             class="xmc-muted">
-            PNG/JPG/WEBP armazenado localmente.
+
+            Nenhum fundo personalizado.
+
         </div>
 
     </div>
@@ -1391,7 +1426,7 @@ panel.innerHTML = \`
     <div class="xmc-card">
 
         <div class="xmc-label">
-            🌫️ Opacidade do fundo
+            🌫️ Opacidade
         </div>
 
         <div class="xmc-row">
@@ -1431,9 +1466,7 @@ panel.innerHTML = \`
 
 </div>
 
-<!-- =====================================================
-     AUDIO
-===================================================== -->
+<!-- AUDIO -->
 
 <div
     class="xmc-section"
@@ -1457,7 +1490,7 @@ panel.innerHTML = \`
     <div class="xmc-card">
 
         <div class="xmc-label">
-            Volume
+            🔉 Volume
         </div>
 
         <div class="xmc-row">
@@ -1485,7 +1518,9 @@ panel.innerHTML = \`
         <button
             class="xmc-btn"
             id="xmc-test-sound">
+
             🔊 Testar som
+
         </button>
 
     </div>
@@ -1535,31 +1570,49 @@ document.body.appendChild(
 ========================================================= */
 
 const bg =
-    document.getElementById("xmc-bg");
+    document.getElementById(
+        "xmc-bg"
+    );
 
 const status =
-    document.getElementById("xmc-status");
+    document.getElementById(
+        "xmc-status"
+    );
 
 const bar =
-    document.getElementById("xmc-bar");
+    document.getElementById(
+        "xmc-bar"
+    );
 
 const percent =
-    document.getElementById("xmc-percent");
+    document.getElementById(
+        "xmc-percent"
+    );
 
 const speed =
-    document.getElementById("xmc-speed");
+    document.getElementById(
+        "xmc-speed"
+    );
 
 const speedValue =
-    document.getElementById("xmc-speed-value");
+    document.getElementById(
+        "xmc-speed-value"
+    );
 
 const error =
-    document.getElementById("xmc-error");
+    document.getElementById(
+        "xmc-error"
+    );
 
 const errorValue =
-    document.getElementById("xmc-error-value");
+    document.getElementById(
+        "xmc-error-value"
+    );
 
 const correction =
-    document.getElementById("xmc-correction");
+    document.getElementById(
+        "xmc-correction"
+    );
 
 const correctionDelay =
     document.getElementById(
@@ -1626,10 +1679,11 @@ for (
 ) {
 
     const option =
-        document.createElement("option");
+        document.createElement(
+            "option"
+        );
 
-    option.value =
-        id;
+    option.value = id;
 
     option.textContent =
         theme.icon +
@@ -1639,7 +1693,6 @@ for (
     themeSelect.appendChild(
         option
     );
-
 }
 
 /* =========================================================
@@ -1649,7 +1702,9 @@ for (
 function applyTheme() {
 
     const theme =
-        themes[settings.theme] ||
+        themes[
+            settings.theme
+        ] ||
         themes.plains;
 
     panel.style.setProperty(
@@ -1683,27 +1738,27 @@ function applyTheme() {
     bg.style.backgroundImage =
         settings.bgImage
             ? 'url("' +
-                settings.bgImage +
-                '")'
+              settings.bgImage +
+              '")'
             : "none";
 
     bg.style.opacity =
         settings.bgImage
             ? Number(
-                settings.bgOpacity ?? .12
+                settings.bgOpacity ??
+                0.12
               )
             : 0;
 
     imageStatus.textContent =
         settings.bgImage
             ? "✅ Fundo personalizado ativo."
-            : "PNG/JPG/WEBP armazenado localmente.";
+            : "Nenhum fundo personalizado.";
 
     particles.style.display =
         settings.particles
             ? "block"
             : "none";
-
 }
 
 /* =========================================================
@@ -1713,7 +1768,9 @@ function applyTheme() {
 function applyMode() {
 
     const mode =
-        modes[settings.mode] ||
+        modes[
+            settings.mode
+        ] ||
         modes.normal;
 
     speed.value =
@@ -1734,16 +1791,15 @@ function applyMode() {
                 button.classList.toggle(
                     "active",
                     button.dataset.mode ===
-                        settings.mode
+                    settings.mode
                 );
 
             }
         );
-
 }
 
 /* =========================================================
-   ESTIMATE
+   TIME ESTIMATE
 ========================================================= */
 
 function formatTime(seconds) {
@@ -1751,34 +1807,41 @@ function formatTime(seconds) {
     if (seconds < 1)
         return "< 1 s";
 
-    const s =
+    const value =
         Math.round(seconds);
 
-    const mins =
-        Math.floor(s / 60);
-
-    const secs =
-        s % 60;
-
-    if (mins > 0) {
-
-        return (
-            mins +
-            " min " +
-            secs +
-            " s"
+    const minutes =
+        Math.floor(
+            value / 60
         );
 
+    const secondsLeft =
+        value % 60;
+
+    if (!minutes) {
+
+        return (
+            secondsLeft +
+            " s"
+        );
     }
 
-    return s + " s";
-
+    return (
+        minutes +
+        " min " +
+        secondsLeft +
+        " s"
+    );
 }
 
-function updateEstimate(length = 100) {
+function updateEstimate(
+    length = 100
+) {
 
     const delay =
-        Number(speed.value) || 55;
+        Number(
+            speed.value
+        ) || 55;
 
     const estimated =
         (
@@ -1788,8 +1851,9 @@ function updateEstimate(length = 100) {
 
     estimate.textContent =
         "⏱️ Estimativa: " +
-        formatTime(estimated);
-
+        formatTime(
+            estimated
+        );
 }
 
 /* =========================================================
@@ -1808,7 +1872,6 @@ speed.oninput = () => {
     save();
 
     updateEstimate();
-
 };
 
 error.oninput = () => {
@@ -1821,7 +1884,6 @@ error.oninput = () => {
         "%";
 
     save();
-
 };
 
 correction.onchange = () => {
@@ -1830,7 +1892,6 @@ correction.onchange = () => {
         correction.checked;
 
     save();
-
 };
 
 correctionDelay.oninput = () => {
@@ -1844,7 +1905,6 @@ correctionDelay.oninput = () => {
         );
 
     save();
-
 };
 
 themeSelect.onchange = () => {
@@ -1853,15 +1913,16 @@ themeSelect.onchange = () => {
         themeSelect.value;
 
     applyTheme();
-    save();
 
+    save();
 };
 
 bgOpacity.oninput = () => {
 
     settings.bgOpacity =
-        Number(bgOpacity.value) /
-        100;
+        Number(
+            bgOpacity.value
+        ) / 100;
 
     bgOpacityValue.textContent =
         bgOpacity.value +
@@ -1873,7 +1934,6 @@ bgOpacity.oninput = () => {
             : 0;
 
     save();
-
 };
 
 particles.onchange = () => {
@@ -1881,12 +1941,16 @@ particles.onchange = () => {
     settings.particles =
         particles.checked;
 
-    particles.style.display =
-        settings.particles
-            ? "block"
-            : "none";
-
     save();
+
+    if (
+        !settings.particles
+    ) {
+
+        particles.innerHTML =
+            "";
+
+    }
 
 };
 
@@ -1896,21 +1960,20 @@ clickToggle.onchange = () => {
         clickToggle.checked;
 
     save();
-
 };
 
 volume.oninput = () => {
 
     settings.volume =
-        Number(volume.value) /
-        100;
+        Number(
+            volume.value
+        ) / 100;
 
     volumeValue.textContent =
         volume.value +
         "%";
 
     save();
-
 };
 
 document
@@ -1919,6 +1982,66 @@ document
     )
     .onclick =
         clickSound;
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+function createParticles() {
+
+    if (!settings.particles)
+        return;
+
+    particles.innerHTML =
+        "";
+
+    const chars = [
+        "✦",
+        "•",
+        "✧",
+        "✨"
+    ];
+
+    for (
+        let i = 0;
+        i < 12;
+        i++
+    ) {
+
+        const p =
+            document.createElement(
+                "span"
+            );
+
+        p.textContent =
+            chars[
+                Math.floor(
+                    Math.random() *
+                    chars.length
+                )
+            ];
+
+        p.style.position =
+            "absolute";
+
+        p.style.left =
+            Math.random() *
+            100 +
+            "%";
+
+        p.style.top =
+            Math.random() *
+            100 +
+            "%";
+
+        p.style.opacity =
+            "0.35";
+
+        particles.appendChild(
+            p
+        );
+    }
+}
 
 /* =========================================================
    IMAGE
@@ -1932,12 +2055,16 @@ imageInput.onchange = () => {
     if (!file)
         return;
 
+    const allowed = [
+        "image/png",
+        "image/jpeg",
+        "image/webp"
+    ];
+
     if (
-        ![
-            "image/png",
-            "image/jpeg",
-            "image/webp"
-        ].includes(file.type)
+        !allowed.includes(
+            file.type
+        )
     ) {
 
         alert(
@@ -1945,7 +2072,6 @@ imageInput.onchange = () => {
         );
 
         return;
-
     }
 
     const reader =
@@ -1959,12 +2085,13 @@ imageInput.onchange = () => {
             );
 
         applyTheme();
-        save();
 
+        save();
     };
 
-    reader.readAsDataURL(file);
-
+    reader.readAsDataURL(
+        file
+    );
 };
 
 /* =========================================================
@@ -2008,12 +2135,11 @@ document
                             section.classList.toggle(
                                 "active",
                                 section.dataset.section ===
-                                    target
+                                target
                             );
 
                         }
                     );
-
             };
 
         }
@@ -2042,9 +2168,10 @@ document
                     modes[id].speed;
 
                 applyMode();
-                save();
-                updateEstimate();
 
+                save();
+
+                updateEstimate();
             };
 
         }
@@ -2077,7 +2204,6 @@ function target() {
     ) {
 
         return active;
-
     }
 
     return document.querySelector(
@@ -2085,14 +2211,16 @@ function target() {
         "input:not([type=hidden])," +
         "[contenteditable=true]"
     );
-
 }
 
 /* =========================================================
    INSERT
 ========================================================= */
 
-function insert(el, char) {
+function insert(
+    el,
+    char
+) {
 
     if (
         el.isContentEditable
@@ -2105,7 +2233,6 @@ function insert(el, char) {
         );
 
         return;
-
     }
 
     const start =
@@ -2127,18 +2254,14 @@ function insert(el, char) {
         new InputEvent(
             "input",
             {
-                bubbles:
-                    true,
-
+                bubbles: true,
                 inputType:
                     "insertText",
-
                 data:
                     char
             }
         )
     );
-
 }
 
 /* =========================================================
@@ -2157,7 +2280,6 @@ function backspace(el) {
         );
 
         return;
-
     }
 
     const start =
@@ -2171,8 +2293,9 @@ function backspace(el) {
     if (
         start === 0 &&
         end === 0
-    )
+    ) {
         return;
+    }
 
     const position =
         Math.max(
@@ -2196,15 +2319,12 @@ function backspace(el) {
         new InputEvent(
             "input",
             {
-                bubbles:
-                    true,
-
+                bubbles: true,
                 inputType:
                     "deleteContentBackward"
             }
         )
     );
-
 }
 
 /* =========================================================
@@ -2223,7 +2343,58 @@ function wait(ms) {
                 )
             )
     );
+}
 
+/* =========================================================
+   RANDOM ERROR
+========================================================= */
+
+function shouldError() {
+
+    if (
+        settings.mode ===
+        "insta"
+    ) {
+        return false;
+    }
+
+    return (
+        Math.random() <
+        (
+            Number(
+                settings.errorRate
+            ) / 100
+        )
+    );
+}
+
+function randomWrongChar(
+    correct
+) {
+
+    const chars =
+        "abcdefghijklmnopqrstuvwxyz";
+
+    let result;
+
+    do {
+
+        result =
+            chars[
+                Math.floor(
+                    Math.random() *
+                    chars.length
+                )
+            ];
+
+    } while (
+        result ===
+        String(
+            correct
+        ).toLowerCase()
+    );
+
+    return result;
 }
 
 /* =========================================================
@@ -2243,7 +2414,8 @@ async function api(
 
                 headers: {
                     Authorization:
-                        "Bearer " + KEY,
+                        "Bearer " +
+                        KEY,
 
                     ...(options.headers || {})
                 }
@@ -2262,66 +2434,19 @@ async function api(
         throw new Error(
             "Resposta inválida."
         );
-
     }
 
-    if (!response.ok) {
+    if (
+        !response.ok
+    ) {
 
         throw new Error(
             data.error ||
             "Erro na API."
         );
-
     }
 
     return data;
-
-}
-
-/* =========================================================
-   ERROR GENERATOR
-========================================================= */
-
-function shouldError() {
-
-    if (
-        settings.mode === "insta"
-    )
-        return false;
-
-    return (
-        Math.random() <
-        Number(
-            settings.errorRate
-        ) / 100
-    );
-
-}
-
-function randomWrongChar(correct) {
-
-    const letters =
-        "abcdefghijklmnopqrstuvwxyz";
-
-    let char;
-
-    do {
-
-        char =
-            letters[
-                Math.floor(
-                    Math.random() *
-                    letters.length
-                )
-            ];
-
-    } while (
-        char ===
-        String(correct).toLowerCase()
-    );
-
-    return char;
-
 }
 
 /* =========================================================
@@ -2336,9 +2461,8 @@ async function run(job) {
     if (!el) {
 
         throw new Error(
-            "Clique primeiro no campo de texto."
+            "Clique no campo onde deseja digitar."
         );
-
     }
 
     el.focus();
@@ -2355,7 +2479,9 @@ async function run(job) {
     if (!total)
         return;
 
-    updateEstimate(total);
+    updateEstimate(
+        total
+    );
 
     const baseDelay =
         Number(
@@ -2369,7 +2495,9 @@ async function run(job) {
     ) {
 
         if (!running)
-            throw new Error("STOP");
+            throw new Error(
+                "STOP"
+            );
 
         let delay =
             baseDelay;
@@ -2402,21 +2530,18 @@ async function run(job) {
         );
 
         /* =====================================
-           TEMPORARY ERROR
+           ERRO TEMPORÁRIO
         ===================================== */
 
         if (
             shouldError()
         ) {
 
-            const wrong =
-                randomWrongChar(
-                    text[i]
-                );
-
             insert(
                 el,
-                wrong
+                randomWrongChar(
+                    text[i]
+                )
             );
 
             clickSound();
@@ -2431,12 +2556,14 @@ async function run(job) {
                     ) || 120
                 );
 
-                backspace(el);
+                backspace(
+                    el
+                );
 
-                await wait(30);
-
+                await wait(
+                    30
+                );
             }
-
         }
 
         insert(
@@ -2456,10 +2583,12 @@ async function run(job) {
             );
 
         bar.style.width =
-            progress + "%";
+            progress +
+            "%";
 
         percent.textContent =
-            progress + "%";
+            progress +
+            "%";
 
         if (
             (i + 1) % 10 === 0 ||
@@ -2495,14 +2624,10 @@ async function run(job) {
                             total
 
                         })
-
                 }
             );
-
         }
-
     }
-
 }
 
 /* =========================================================
@@ -2528,10 +2653,11 @@ async function loop() {
                 status.textContent =
                     "🌙 Nenhum job na fila.";
 
-                await wait(3000);
+                await wait(
+                    3000
+                );
 
                 continue;
-
             }
 
             bar.style.width =
@@ -2582,7 +2708,6 @@ async function loop() {
                                     data.job.text ||
                                     ""
                                 ).length
-
                         })
                 }
             );
@@ -2610,15 +2735,11 @@ async function loop() {
                 status.textContent =
                     "❌ " +
                     error.message;
-
             }
 
             running = false;
-
         }
-
     }
-
 }
 
 /* =========================================================
@@ -2637,10 +2758,9 @@ document
         if (!target()) {
 
             status.textContent =
-                "⚠️ Clique no campo onde deseja digitar.";
+                "⚠️ Clique primeiro no campo de texto.";
 
             return;
-
         }
 
         running = true;
@@ -2649,7 +2769,6 @@ document
             "🌱 Xitos iniciado!";
 
         loop();
-
     };
 
 document
@@ -2662,7 +2781,6 @@ document
 
         status.textContent =
             "⏹️ Parando...";
-
     };
 
 /* =========================================================
@@ -2681,6 +2799,19 @@ document
         minimized.style.display =
             "grid";
 
+        minimized.style.setProperty(
+            "--main",
+            themes[
+                settings.theme
+            ].main
+        );
+
+        minimized.style.setProperty(
+            "--border",
+            themes[
+                settings.theme
+            ].border
+        );
     };
 
 minimized.onclick = () => {
@@ -2690,7 +2821,6 @@ minimized.onclick = () => {
 
     panel.style.display =
         "block";
-
 };
 
 /* =========================================================
@@ -2708,7 +2838,6 @@ document
         panel.remove();
         minimized.remove();
         style.remove();
-
     };
 
 /* =========================================================
@@ -2728,8 +2857,9 @@ header.addEventListener(
             e.target.closest(
                 "button"
             )
-        )
+        ) {
             return;
+        }
 
         dragging = true;
 
@@ -2745,17 +2875,18 @@ header.addEventListener(
             rect.top;
 
         panel.style.left =
-            rect.left + "px";
+            rect.left +
+            "px";
 
         panel.style.top =
-            rect.top + "px";
+            rect.top +
+            "px";
 
         panel.style.right =
             "auto";
 
         panel.style.bottom =
             "auto";
-
     }
 );
 
@@ -2777,7 +2908,6 @@ document.addEventListener(
                 e.clientY -
                 dragY
             ) + "px";
-
     }
 );
 
@@ -2825,11 +2955,8 @@ document.addEventListener(
 
                 minimized.style.display =
                     "grid";
-
             }
-
         }
-
     }
 );
 
@@ -2874,8 +3001,7 @@ volume.value =
         (
             settings.volume ??
             0.25
-        ) *
-        100
+        ) * 100
     );
 
 volumeValue.textContent =
@@ -2887,8 +3013,7 @@ bgOpacity.value =
         (
             settings.bgOpacity ??
             0.12
-        ) *
-        100
+        ) * 100
     );
 
 bgOpacityValue.textContent =
@@ -2897,10 +3022,13 @@ bgOpacityValue.textContent =
 
 applyTheme();
 applyMode();
+createParticles();
 updateEstimate();
 
 console.log(
-    "%c⛏️ XITOS v" + VERSION,
+    "%c⛏️ XITOS v" +
+    VERSION +
+    " ONLINE",
     "color:#79c34b;font-size:20px;font-weight:bold"
 );
 
@@ -2935,7 +3063,6 @@ export default {
                     headers: cors
                 }
             );
-
         }
 
         const url =
@@ -2948,8 +3075,7 @@ export default {
         ===================================================== */
 
         if (
-            request.method ===
-                "GET" &&
+            request.method === "GET" &&
             url.pathname === "/"
         ) {
 
@@ -2963,7 +3089,6 @@ export default {
                 200,
                 request
             );
-
         }
 
         /* =====================================================
@@ -2972,10 +3097,8 @@ export default {
         ===================================================== */
 
         if (
-            request.method ===
-                "GET" &&
-            url.pathname ===
-                "/v1/client"
+            request.method === "GET" &&
+            url.pathname === "/v1/client"
         ) {
 
             const key =
@@ -2992,7 +3115,6 @@ export default {
                     401,
                     request
                 );
-
             }
 
             if (
@@ -3011,7 +3133,6 @@ export default {
                     401,
                     request
                 );
-
             }
 
             const apiUrl =
@@ -3019,14 +3140,14 @@ export default {
 
             const code =
                 CLIENT_CODE
-                    .replace(
-                        /API_URL/g,
+                    .replaceAll(
+                        "__API_URL__",
                         JSON.stringify(
                             apiUrl
                         )
                     )
-                    .replace(
-                        /API_KEY/g,
+                    .replaceAll(
+                        "__API_KEY__",
                         JSON.stringify(
                             key
                         )
@@ -3035,16 +3156,13 @@ export default {
             return json(
                 {
                     ok: true,
-                    authorized:
-                        true,
-                    version:
-                        VERSION,
+                    authorized: true,
+                    version: VERSION,
                     code
                 },
                 200,
                 request
             );
-
         }
 
         /* =====================================================
@@ -3053,10 +3171,8 @@ export default {
         ===================================================== */
 
         if (
-            request.method ===
-                "POST" &&
-            url.pathname ===
-                "/v1/type"
+            request.method === "POST" &&
+            url.pathname === "/v1/type"
         ) {
 
             if (
@@ -3075,7 +3191,6 @@ export default {
                     401,
                     request
                 );
-
             }
 
             let body;
@@ -3096,7 +3211,6 @@ export default {
                     400,
                     request
                 );
-
             }
 
             if (
@@ -3114,7 +3228,6 @@ export default {
                     400,
                     request
                 );
-
             }
 
             const job = {
@@ -3149,9 +3262,11 @@ export default {
 
                 },
 
-                progress: 0,
+                progress:
+                    0,
 
-                done: 0,
+                done:
+                    0,
 
                 total:
                     body.text.length,
@@ -3186,7 +3301,6 @@ export default {
                 200,
                 request
             );
-
         }
 
         /* =====================================================
@@ -3195,8 +3309,7 @@ export default {
         ===================================================== */
 
         if (
-            request.method ===
-                "GET" &&
+            request.method === "GET" &&
             url.pathname ===
                 "/v1/jobs/next"
         ) {
@@ -3217,7 +3330,6 @@ export default {
                     401,
                     request
                 );
-
             }
 
             const list =
@@ -3254,11 +3366,9 @@ export default {
                         candidates.push(
                             job
                         );
-
                     }
 
                 } catch {}
-
             }
 
             candidates.sort(
@@ -3280,7 +3390,6 @@ export default {
                     200,
                     request
                 );
-
             }
 
             job.status =
@@ -3304,7 +3413,6 @@ export default {
                 200,
                 request
             );
-
         }
 
         /* =====================================================
@@ -3314,12 +3422,11 @@ export default {
 
         const statusMatch =
             url.pathname.match(
-                /^\\/v1\\/jobs\\/([^\\/]+)\\/status$/
+                /^\/v1\/jobs\/([^\/]+)\/status$/
             );
 
         if (
-            request.method ===
-                "POST" &&
+            request.method === "POST" &&
             statusMatch
         ) {
 
@@ -3339,7 +3446,6 @@ export default {
                     401,
                     request
                 );
-
             }
 
             const id =
@@ -3361,7 +3467,6 @@ export default {
                     404,
                     request
                 );
-
             }
 
             let job;
@@ -3384,7 +3489,6 @@ export default {
                     500,
                     request
                 );
-
             }
 
             let body = {};
@@ -3398,17 +3502,16 @@ export default {
 
             if (
                 typeof body.status ===
-                    "string"
+                "string"
             ) {
 
                 job.status =
                     body.status;
-
             }
 
             if (
                 typeof body.progress ===
-                    "number"
+                "number"
             ) {
 
                 job.progress =
@@ -3419,27 +3522,30 @@ export default {
                             body.progress
                         )
                     );
-
             }
 
             if (
                 typeof body.done ===
-                    "number"
+                "number"
             ) {
 
                 job.done =
-                    body.done;
-
+                    Math.max(
+                        0,
+                        body.done
+                    );
             }
 
             if (
                 typeof body.total ===
-                    "number"
+                "number"
             ) {
 
                 job.total =
-                    body.total;
-
+                    Math.max(
+                        0,
+                        body.total
+                    );
             }
 
             job.updatedAt =
@@ -3457,7 +3563,6 @@ export default {
                     ok: true,
 
                     job: {
-
                         id:
                             job.id,
 
@@ -3466,14 +3571,20 @@ export default {
 
                         progress:
                             job.progress ??
-                            0
+                            0,
 
+                        done:
+                            job.done ??
+                            0,
+
+                        total:
+                            job.total ??
+                            0
                     }
                 },
                 200,
                 request
             );
-
         }
 
         /* =====================================================
@@ -3489,7 +3600,5 @@ export default {
             404,
             request
         );
-
     }
-
 };
